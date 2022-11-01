@@ -33,4 +33,8 @@ export class User extends BaseEntity {
     default: UserRole.User,
   })
   role: UserRole;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+  @Column({ type: 'timestamp', nullable: true, default: null })
+  updatedAt: Date | null;
 }

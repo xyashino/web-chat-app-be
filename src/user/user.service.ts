@@ -26,7 +26,7 @@ export class UserService {
   async register(body: RegisterUserDto): Promise<UserResponse> {
     const { username, email, password, surname, name } = body;
 
-    this.checkConflictData(email, surname);
+    await this.checkConflictData(email, surname);
 
     const user = new User();
     user.username = username;
@@ -68,6 +68,9 @@ export class UserService {
     user.email = email ?? user.email;
     user.name = name ?? user.name;
     user.surname = surname ?? user.surname;
+    user.updatedAt = new Date();
+    await user.save();
+    return this.filter(user);
   }
 
   remove(id: number) {
