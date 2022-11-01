@@ -5,18 +5,27 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { UserData } from '../types/interfaces/user/user-data';
 import { ConfigService } from '@nestjs/config';
+import { UserResponse } from '../types/user/user-response';
 
 @Injectable()
 export class UserService {
   constructor(private configService: ConfigService) {}
-  async register(body: RegisterUserDto) {
+
+  private filter(user: UserData): UserResponse {
+    const { id, username, email, name, surname } = user;
+    return { id, username, email, name, surname };
+  }
+
+  async register(body: RegisterUserDto): Promise<UserResponse> {
     const { username, email, password, surname, name } = body;
     const userExist: UserData | null =
       (await User.findOneBy({ email })) ?? (await User.findOneBy({ username }));
+
     if (userExist) {
       const existValue = userExist.email === email ? 'email' : 'username';
       throw new ConflictException(`User with this ${existValue} exist`);
     }
+
     const user = new User();
     user.username = username;
     user.email = email;
@@ -24,10 +33,11 @@ export class UserService {
       password,
       +this.configService.get<number>('ROUNDS_SALT'),
     );
+
     user.name = name ?? null;
     user.surname = surname ?? null;
     await user.save();
-    return user;
+    return this.filter(user);
   }
 
   findAll() {
