@@ -47,8 +47,9 @@ export class UserService {
     return this.filter(user);
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll(): Promise<UserResponse[]> {
+    const users = await User.find();
+    return users.map((user) => this.filter(user));
   }
 
   findOne(id: number) {
