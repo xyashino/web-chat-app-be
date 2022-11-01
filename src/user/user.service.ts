@@ -13,7 +13,14 @@ export class UserService {
 
   private filter(user: UserData): UserResponse {
     const { id, username, email, name, surname } = user;
-    return { id, username, email, name, surname };
+
+    return {
+      id,
+      username,
+      email,
+      ...(name ? { name } : {}),
+      ...(surname ? { surname } : {}),
+    };
   }
 
   async register(body: RegisterUserDto): Promise<UserResponse> {
