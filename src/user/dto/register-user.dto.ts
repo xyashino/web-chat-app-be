@@ -5,7 +5,6 @@ import {
   IsOptional,
   IsString,
   Length,
-  Max,
 } from 'class-validator';
 
 type UserRegistration = Omit<UserData, 'id' | 'hashedPassword'> & {
@@ -15,7 +14,7 @@ type UserRegistration = Omit<UserData, 'id' | 'hashedPassword'> & {
 export class RegisterUserDto implements UserRegistration {
   @IsString()
   @IsNotEmpty()
-  @Max(255)
+  @Length(3, 255)
   username: string;
   @IsEmail()
   @IsNotEmpty()
