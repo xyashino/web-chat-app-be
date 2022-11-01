@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { hash } from 'bcrypt';
+import { hash, compare } from 'bcrypt';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -25,13 +25,8 @@ export class UserService {
 
   async register(body: RegisterUserDto): Promise<UserResponse> {
     const { username, email, password, surname, name } = body;
-    const userExist: UserData | null =
-      (await User.findOneBy({ email })) ?? (await User.findOneBy({ username }));
 
-    if (userExist) {
-      const existValue = userExist.email === email ? 'email' : 'username';
-      throw new ConflictException(`User with this ${existValue} exist`);
-    }
+    this.checkConflictData(email, surname);
 
     const user = new User();
     user.username = username;
@@ -56,11 +51,38 @@ export class UserService {
     return User.findOneBy({ id });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, body: UpdateUserDto) {
+    const user = await User.findOneBy({ id });
+    if (!user) {
+      throw new ConflictException('Invalid id');
+    }
+
+    const { password, username, email, name, surname } = body;
+
+    if (!(await compare(password, user.hashedPassword))) {
+      //@TODO change error
+      throw new ConflictException();
+    }
+    await this.checkConflictData(name ?? '', username ?? '');
+    user.username = username ?? user.username;
+    user.email = email ?? user.email;
+    user.name = name ?? user.name;
+    user.surname = surname ?? user.surname;
   }
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  private async checkConflictData(
+    email: string,
+    username: string,
+  ): Promise<void> {
+    const userExist: UserData | null =
+      (await User.findOneBy({ email })) ?? (await User.findOneBy({ username }));
+    if (userExist)
+      throw new ConflictException(
+        `${userExist.email === email ? 'Email' : 'Username'} is taken`,
+      );
   }
 }
