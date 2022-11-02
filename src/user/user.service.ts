@@ -26,7 +26,7 @@ export class UserService {
   async register(body: RegisterUserDto): Promise<UserResponse> {
     const { username, email, password, surname, name } = body;
 
-    await this.checkConflictData(email, surname);
+    await this.checkConflictData(email, username);
 
     const user = new User();
     user.username = username;
@@ -81,6 +81,7 @@ export class UserService {
     email: string,
     username: string,
   ): Promise<void> {
+    console.log(email, username);
     const userExist: UserData | null =
       (await User.findOneBy({ email })) ?? (await User.findOneBy({ username }));
     if (userExist)

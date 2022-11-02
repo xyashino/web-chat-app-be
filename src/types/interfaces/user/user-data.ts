@@ -7,4 +7,6 @@ export interface UserData {
   surname?: string;
   hashedPassword: string;
   role?: UserRole;
+  createdAt: Date;
+  updatedAt: Date | null;
 }
