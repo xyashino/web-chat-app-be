@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({
       disableErrorMessages: false,
@@ -16,7 +17,7 @@ async function bootstrap() {
       },
     }),
   );
-  app.use(cookieParser());
+
   const { PORT } = process.env;
   await app.listen(PORT);
 }

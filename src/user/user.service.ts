@@ -98,7 +98,6 @@ export class UserService {
     email: string,
     username: string,
   ): Promise<void> {
-    console.log(email, username);
     const userExist: UserData | null =
       (await User.findOneBy({ email })) ?? (await User.findOneBy({ username }));
     if (userExist)
