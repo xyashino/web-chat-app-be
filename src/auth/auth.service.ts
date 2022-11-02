@@ -17,7 +17,7 @@ export class AuthService {
     expiresIn: number;
   } {
     const payload: JwtPayload = { id: currentTokenId };
-    const expiresIn = 60 * 60 * 24;
+    const expiresIn = +this.configService.get<string>('EXPIRE_JWT');
     const accessToken = sign(
       payload,
       this.configService.get<string>('SECRET_JWT'),
@@ -59,13 +59,13 @@ export class AuthService {
       const token = await this.createToken(await this.generateToken(user));
       return res
         .cookie('jwt', token.accessToken, {
-          secure: false,
+          secure: this.configService.get<boolean>('PROTOCOL_SECURE'),
           domain: this.configService.get<string>('DOMAIN'),
-          httpOnly: true,
+          httpOnly: this.configService.get<boolean>('HTTP_ONLY'),
         })
         .json({ logged: true, status: 200 });
     } catch (e) {
-      return res.json({ error: e.message });
+      return res.json({ error: e.message, status: e.status });
     }
   }
 
