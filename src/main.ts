@@ -16,7 +16,7 @@ async function bootstrap() {
       },
     }),
   );
-  app.use(cookieParser())
+  app.use(cookieParser());
   const { PORT } = process.env;
   await app.listen(PORT);
 }
