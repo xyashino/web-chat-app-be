@@ -7,7 +7,10 @@ import {
   Length,
 } from 'class-validator';
 
-type UserRegistration = Omit<UserData, 'id' | 'hashedPassword'> & {
+type UserRegistration = Omit<
+  UserData,
+  'id' | 'hashedPassword' | 'createdAt' | 'updatedAt'
+> & {
   password: UserData['hashedPassword'];
 };
 
