@@ -29,6 +29,11 @@ export class User extends BaseEntity implements UserData {
   })
   hashedPassword: string;
   @Column({
+    nullable: true,
+    default: null,
+  })
+  currentTokenId: string | null;
+  @Column({
     type: 'tinyint',
     unsigned: true,
     default: UserRole.User,

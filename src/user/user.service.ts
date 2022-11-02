@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { hash, compare } from 'bcrypt';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,12 +16,10 @@ export class UserService {
   constructor(private configService: ConfigService) {}
 
   private filter(user: UserData): UserResponse {
-    const { id, username, email, name, surname } = user;
-
+    const { id, username, name, surname } = user;
     return {
       id,
       username,
-      email,
       ...(name ? { name } : {}),
       ...(surname ? { surname } : {}),
     };
@@ -47,14 +49,29 @@ export class UserService {
     return users.map((user) => this.filter(user));
   }
 
-  findOne(id: string) {
-    return User.findOneBy({ id });
+  async findOne(userId: string) {
+    const user = await User.findOneBy({ id: userId });
+    if (!user) {
+      throw new NotFoundException();
+    }
+    const { id, username, email, createdAt, updatedAt, role, name, surname } =
+      user;
+    return {
+      id,
+      username,
+      email,
+      ...(name ? { name } : {}),
+      ...(surname ? { surname } : {}),
+      role,
+      createdAt,
+      ...(updatedAt ? { updatedAt } : {}),
+    };
   }
 
   async update(id: string, body: UpdateUserDto) {
     const user = await User.findOneBy({ id });
     if (!user) {
-      throw new ConflictException('Invalid id');
+      throw new NotFoundException();
     }
 
     const { password, username, email, name, surname } = body;
