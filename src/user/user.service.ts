@@ -11,18 +11,44 @@ import { UserData } from '../types/interfaces/user/user-data';
 import { ConfigService } from '@nestjs/config';
 import { UserResponse } from '../types/user/user-response';
 
+interface OptionsData {
+  dateInformation?: boolean;
+  personalData?: boolean;
+}
+
 @Injectable()
 export class UserService {
   constructor(private configService: ConfigService) {}
 
-  private filter(user: UserData): UserResponse {
-    const { id, username, name, surname } = user;
-    return {
+  private filter(
+    user: UserData,
+    options: OptionsData | false = false,
+  ): UserResponse {
+    const { id, username, name, surname, email, createdAt, updatedAt } = user;
+    let filterUserDataObject: UserResponse = {
       id,
       username,
-      ...(name ? { name } : {}),
-      ...(surname ? { surname } : {}),
     };
+
+    if (!options) return filterUserDataObject;
+
+    if (options.personalData) {
+      filterUserDataObject = {
+        ...filterUserDataObject,
+        email,
+        ...(name ? { name } : {}),
+        ...(surname ? { surname } : {}),
+      };
+    }
+
+    if (options.dateInformation) {
+      filterUserDataObject = {
+        ...filterUserDataObject,
+        ...(createdAt ? { createdAt } : {}),
+        ...(updatedAt ? { updatedAt } : {}),
+      };
+    }
+    return filterUserDataObject;
   }
 
   async register(body: RegisterUserDto): Promise<UserResponse> {
@@ -41,7 +67,7 @@ export class UserService {
     user.name = name ?? null;
     user.surname = surname ?? null;
     await user.save();
-    return this.filter(user);
+    return this.filter(user, { personalData: true });
   }
 
   async findAll(): Promise<UserResponse[]> {
@@ -54,20 +80,9 @@ export class UserService {
     if (!user) {
       throw new NotFoundException();
     }
-    const { id, username, email, createdAt, updatedAt, role, name, surname } =
-      user;
-    return {
-      id,
-      username,
-      email,
-      ...(name ? { name } : {}),
-      ...(surname ? { surname } : {}),
-      role,
-      createdAt,
-      ...(updatedAt ? { updatedAt } : {}),
-    };
+    return this.filter(user);
   }
-
+  //@TODO SET ONLY FOR ADMIN
   async update(id: string, body: UpdateUserDto) {
     const user = await User.findOneBy({ id });
     if (!user) {
@@ -93,6 +108,11 @@ export class UserService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
+
+  getCurrentUser(user: User) {
+    return this.filter(user, { personalData: true, dateInformation: true });
+  }
+
 
   private async checkConflictData(
     email: string,
