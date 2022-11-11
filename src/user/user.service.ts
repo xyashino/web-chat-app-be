@@ -82,28 +82,15 @@ export class UserService {
     }
     return this.filter(user);
   }
-  //@TODO SET ONLY FOR ADMIN
-  async update(id: string, body: UpdateUserDto) {
-    const user = await User.findOneBy({ id });
-    if (!user) {
-      throw new NotFoundException();
-    }
-
-    const { password, username, email, name, surname } = body;
-
-    if (!(await compare(password, user.hashedPassword))) {
-      //@TODO change error
-      throw new ConflictException();
-    }
-    await this.checkConflictData(name ?? '', username ?? '');
-    user.username = username ?? user.username;
-    user.email = email ?? user.email;
-    user.name = name ?? user.name;
-    user.surname = surname ?? user.surname;
-    user.updatedAt = new Date();
-    await user.save();
-    return this.filter(user);
-  }
+  // //@TODO SET ONLY FOR ADMIN
+  // async update(id: string, body: UpdateUserDto) {
+  //   const user = await User.findOneBy({ id });
+  //   if (!user) {
+  //     throw new NotFoundException();
+  //   }
+  //   const updatedUser = await this.updateUserData(body, user);
+  //   return this.filter(updatedUser);
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} user`;
@@ -113,6 +100,13 @@ export class UserService {
     return this.filter(user, { personalData: true, dateInformation: true });
   }
 
+  async updateCurrentUser(user: User, body: UpdateUserDto) {
+    const updatedUser = await this.updateUserData(body, user);
+    return this.filter(updatedUser, {
+      personalData: true,
+      dateInformation: true,
+    });
+  }
 
   private async checkConflictData(
     email: string,
@@ -124,5 +118,20 @@ export class UserService {
       throw new ConflictException(
         `${userExist.email === email ? 'Email' : 'Username'} is taken`,
       );
+  }
+  private async updateUserData(body: UpdateUserDto, user: User): Promise<User> {
+    const { password, username, email, name, surname } = body;
+
+    if (!(await compare(password, user.hashedPassword))) {
+      throw new ConflictException('Invalid password');
+    }
+    await this.checkConflictData(name ?? '', username ?? '');
+    user.username = username ?? user.username;
+    user.email = email ?? user.email;
+    user.name = name ?? user.name;
+    user.surname = surname ?? user.surname;
+    user.updatedAt = new Date();
+    await user.save();
+    return user;
   }
 }

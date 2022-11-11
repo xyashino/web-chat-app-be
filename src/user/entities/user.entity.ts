@@ -1,5 +1,5 @@
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { UserRole } from '../../types/user/user-role';
+import { UserRoleEnum } from '../../types/user/user-role.enum';
 import { UserData } from '../../types/interfaces/user/user-data';
 
 @Entity()
@@ -34,11 +34,18 @@ export class User extends BaseEntity implements UserData {
   })
   currentTokenId: string | null;
   @Column({
-    type: 'tinyint',
-    unsigned: true,
-    default: UserRole.User,
+    type: 'varchar',
+    length: '50',
+    default: UserRoleEnum.User,
   })
-  role: UserRole;
+  role: UserRoleEnum;
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  isActive: boolean;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  lastActive: Date;
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
   @Column({ type: 'timestamp', nullable: true, default: null })

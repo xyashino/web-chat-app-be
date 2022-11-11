@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { AuthLoginDto } from './dto/auth-login.dto';
 import { User } from '../user/entities/user.entity';
-import { UserObj } from '../decorators/user-decorator';
+import { UserObj } from '../decorators/user.decorator';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')

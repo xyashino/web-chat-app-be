@@ -55,6 +55,7 @@ export class AuthService {
       if (!user || !matchPwd) {
         return res.json({ error: 'Invalid login data!' });
       }
+      user.isActive = true;
 
       const token = await this.createToken(await this.generateToken(user));
       return res
@@ -72,6 +73,8 @@ export class AuthService {
   async logout(user: User, res: Response): Promise<any> {
     try {
       user.currentTokenId = null;
+      user.lastActive = new Date();
+      user.isActive = false;
       await user.save();
       res.clearCookie('jwt', {
         secure: this.configService.get<boolean>('PROTOCOL_SECURE'),

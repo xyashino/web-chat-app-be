@@ -1,4 +1,4 @@
-import { UserRole } from '../../user/user-role';
+import { UserRoleEnum } from '../../user/user-role.enum';
 export interface UserData {
   id: string;
   username: string;
@@ -6,7 +6,7 @@ export interface UserData {
   name?: string;
   surname?: string;
   hashedPassword: string;
-  role?: UserRole;
+  role?: UserRoleEnum;
   createdAt: Date;
   updatedAt: Date | null;
 }
