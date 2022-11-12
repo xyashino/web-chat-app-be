@@ -13,9 +13,12 @@ import { UserService } from './user.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { UserObj } from '../decorators/user-decorator';
+import { UserObj } from '../decorators/user.decorator';
 import { User } from './entities/user.entity';
+import { RolesGuard } from '../guards/roles.guard';
+import { DeleteUserDto } from './dto/delete-user.dto';
 
+@UseGuards(RolesGuard)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -31,10 +34,11 @@ export class UserController {
   getCurrentUser(@UserObj() user: User) {
     return this.userService.getCurrentUser(user);
   }
+
   @Patch('/current')
   @UseGuards(AuthGuard('jwt'))
-  updateCurrentUser(@UserObj() user: User) {
-    return this.userService.updateCurrentUser(user);
+  updateCurrentUser(@UserObj() user: User, @Body() body: UpdateUserDto) {
+    return this.userService.updateCurrentUser(user, body);
   }
 
   @Post('/register')
@@ -42,24 +46,23 @@ export class UserController {
     return this.userService.register(body);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get('/:id')
+  @UseGuards(AuthGuard('jwt'))
   findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.userService.findOne(id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Patch('/:id')
-  update(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.userService.update(id, updateUserDto);
-  }
+  // @Patch('/:id')
+  // @UseGuards(AuthGuard('jwt'))
+  // @Roles(UserRoleEnum.Admin)
+  // update(@Param('id', new ParseUUIDPipe()) id: string, @UserObj() user: User) {
+  //   // console.log(user);
+  //   return 'test';
+  // }
 
-  @UseGuards(AuthGuard('jwt'))
   @Delete('/:id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @UseGuards(AuthGuard('jwt'))
+  remove(@Param('id', new ParseUUIDPipe()) id: string, body: DeleteUserDto) {
+    return this.userService.remove(id, body);
   }
 }

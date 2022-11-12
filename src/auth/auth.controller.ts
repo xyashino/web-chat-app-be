@@ -18,7 +18,6 @@ export class AuthController {
   @Get('/logout')
   @UseGuards(AuthGuard('jwt'))
   async logout(@UserObj() user: User, @Res() res: Response) {
-    console.log(user);
     debugger;
     return this.authService.logout(user, res);
   }

@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
 import { hash, compare } from 'bcrypt';
@@ -10,6 +11,7 @@ import { User } from './entities/user.entity';
 import { UserData } from '../types/interfaces/user/user-data';
 import { ConfigService } from '@nestjs/config';
 import { UserResponse } from '../types/user/user-response';
+import { DeleteUserDto } from './dto/delete-user.dto';
 
 interface OptionsData {
   dateInformation?: boolean;
@@ -92,8 +94,12 @@ export class UserService {
   //   return this.filter(updatedUser);
   // }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string, body: DeleteUserDto) {
+    const user = await User.findOneBy({ id });
+    if (!user || !(await compare(body.password, user.hashedPassword))) {
+      throw new NotAcceptableException();
+    }
+    await user.remove();
   }
 
   getCurrentUser(user: User) {
