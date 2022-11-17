@@ -1,6 +1,8 @@
 ## Installation
 ```bash
 $ npm install
+OR
+$ yarn
 ```
 ## Running the app
 ```bash
